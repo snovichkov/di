@@ -54,6 +54,7 @@ func TestIsDefined(t *testing.T) {
 		Scope: App,
 		Build: func(ctn Container) (interface{}, error) { return nil, nil },
 	})
+	b.Alias("another", "name")
 
 	require.True(t, b.IsDefined("name"))
 	require.False(t, b.IsDefined("undefined"))
@@ -102,10 +103,12 @@ func TestBuild(t *testing.T) {
 			Build: func(ctn Container) (interface{}, error) { return nil, nil },
 		},
 	}...)
+	b.Alias("o3", "o1")
 
 	app := b.Build()
 	require.Equal(t, App, app.Scope())
 	require.Len(t, app.Definitions(), 2)
+	require.Len(t, app.Aliases(), 1)
 	require.Equal(t, App, app.Definitions()["o1"].Scope)
 	require.Equal(t, Request, app.Definitions()["o2"].Scope)
 }

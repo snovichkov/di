@@ -10,6 +10,10 @@ package di
 // it is built thanks to the object definition.
 // The following attempts to get this object will return the same object.
 type Container interface {
+	// Aliases returns the map of the available aliases.
+	// These aliases represent all available aliases that this Container can build.
+	Aliases() map[string]string
+
 	// Definition returns the map of the available definitions ordered by name.
 	// These definitions represent all the objects that this Container can build.
 	Definitions() map[string]Def

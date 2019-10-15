@@ -7,6 +7,7 @@ import "sync"
 // It should be used inside a container.
 type containerCore struct {
 	m               sync.RWMutex
+	aliases         AliasMap
 	closed          bool
 	scope           string
 	scopes          ScopeList
@@ -16,6 +17,10 @@ type containerCore struct {
 	unscopedChild   *containerCore
 	objects         map[string]interface{}
 	deleteIfNoChild bool
+}
+
+func (ctn *containerCore) Aliases() map[string]string {
+	return ctn.aliases.Copy()
 }
 
 func (ctn *containerCore) Definitions() map[string]Def {

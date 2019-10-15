@@ -10,6 +10,7 @@ import (
 // Then you can add definitions with the Add method,
 // and finally build the Container with the Build method.
 type Builder struct {
+	aliases     AliasMap
 	definitions DefMap
 	scopes      ScopeList
 }
@@ -30,9 +31,28 @@ func NewBuilder(scopes ...string) (*Builder, error) {
 	}
 
 	return &Builder{
+		aliases:     AliasMap{},
 		definitions: DefMap{},
 		scopes:      scopes,
 	}, nil
+}
+
+// Alias set alias to definition.
+func (b *Builder) Alias(name, target string) error {
+	if b.IsDefined(name) {
+		return fmt.Errorf("definition with name `%s` already defined")
+	}
+
+	if b.IsDefined(target) {
+		b.aliases[name] = target
+	}
+
+	return fmt.Errorf("target `%s` is not defined", target)
+}
+
+// Aliases returns the list of available aliases.
+func (b *Builder) Aliases() AliasMap {
+	return b.aliases.Copy()
 }
 
 func checkScopes(scopes []string) error {
@@ -54,7 +74,7 @@ func checkScopes(scopes []string) error {
 
 // Scopes returns the list of available scopes.
 func (b *Builder) Scopes() ScopeList {
-	return ScopeList(b.scopes).Copy()
+	return b.scopes.Copy()
 }
 
 // Definitions returns a map with the all the objects definitions
@@ -94,7 +114,7 @@ func (b *Builder) add(def Def) error {
 	}
 
 	if def.Build == nil {
-		return errors.New("Build can not be nil")
+		return errors.New("build can not be nil")
 	}
 
 	b.definitions[def.Name] = def
@@ -132,6 +152,7 @@ func (b *Builder) Build() Container {
 
 	return &container{
 		containerCore: &containerCore{
+			aliases:     b.aliases,
 			scopes:      b.scopes,
 			scope:       b.scopes[0],
 			definitions: defs,
